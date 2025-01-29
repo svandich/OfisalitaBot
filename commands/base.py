@@ -68,6 +68,14 @@ class Command:
             return self.message_obj.reply_to_message.text
         return self.arg
 
+    def get_arg_and_reply(self) -> tuple[str, str]:
+        """
+        Returns the argument of a command AND the text of the message replied to.
+        """
+        if self.message_obj.reply_to_message:
+            return self.arg, self.message_obj.reply_to_message.text
+        return self.arg, ""
+
     def use_default_opt(self, default_key: str):
         """
         If only a single flag option is provided, assume it's the default key.
