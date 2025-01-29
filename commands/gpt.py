@@ -78,12 +78,21 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
     ai_model = cmd.opts.pop("m", None) or cmd.opts.pop("model", None) or REPLY_MODEL
     client = ai_client(ai_model, update)
 
-    message = cmd.get_reply_or_arg()
+    message, reply = cmd.get_arg_and_reply()
     reply_message_id = update.message.message_id
 
+    if reply:
+        system = (
+            f"Considera que el usuario está respondiendo a un mensaje. "
+            f"Este mensaje podría ser el sujeto del mensaje que te envía, un complemento, contexto adicional para el prompt, etc. "
+            f"El mensaje al que se está respondiendo es el siguiente:\n\n\"{reply}\""
+        )
+    else:
+        system = ""
+    
     conversation = [GenAIMessage("user", message)]
 
-    response = client.generate(conversation, **{"temperature": 0.5, **cmd.opts})
+    response = client.generate(conversation, system=system, **{"temperature": 0.5, **cmd.opts})
 
     try_msg(
         context.bot,
