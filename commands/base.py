@@ -59,9 +59,9 @@ class Command:
         opts_dict = dict(opts_pairs)
         return opts_dict
 
-    def get_arg_reply(self) -> str:
+    def get_reply_or_arg(self) -> str:
         """
-        Returns the argument of a command or the text of a reply.
+        Returns the text of the message replied to OR the argument of the command.
         (Preference towards replies)
         """
         if self.message_obj.reply_to_message:
@@ -94,5 +94,5 @@ class CallbackQueryCommand(Command):
     def _parse_opts(self, opts):
         return json.loads(opts) if opts else {}
 
-    def get_arg_reply(self) -> str:
+    def get_reply_or_arg(self) -> str:
         pass
