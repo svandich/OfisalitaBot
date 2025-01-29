@@ -59,14 +59,22 @@ class Command:
         opts_dict = dict(opts_pairs)
         return opts_dict
 
-    def get_arg_reply(self) -> str:
+    def get_reply_or_arg(self) -> str:
         """
-        Returns the argument of a command or the text of a reply.
+        Returns the text of the message replied to OR the argument of the command.
         (Preference towards replies)
         """
         if self.message_obj.reply_to_message:
             return self.message_obj.reply_to_message.text
         return self.arg
+
+    def get_arg_and_reply(self) -> tuple[str, str]:
+        """
+        Returns the argument of a command AND the text of the message replied to.
+        """
+        if self.message_obj.reply_to_message:
+            return self.arg, self.message_obj.reply_to_message.text
+        return self.arg, ""
 
     def use_default_opt(self, default_key: str):
         """
@@ -94,5 +102,5 @@ class CallbackQueryCommand(Command):
     def _parse_opts(self, opts):
         return json.loads(opts) if opts else {}
 
-    def get_arg_reply(self) -> str:
+    def get_reply_or_arg(self) -> str:
         pass

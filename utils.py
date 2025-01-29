@@ -140,7 +140,7 @@ def get_arg_reply(update: Update) -> str:
     Returns the argument of a command or the text of a reply.
     (Preference towards replies)
 
-    DEPRECATED: Use Command.get_arg_reply instead.
+    DEPRECATED: Use Command.get_reply_or_arg() instead.
     """
     if update.message.reply_to_message is None:
         return get_arg(update)
