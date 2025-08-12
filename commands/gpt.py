@@ -106,11 +106,25 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
 @command(member_exclusive=True)
 def desigliar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
-    Attempts to invent the words for a given acronym using an LLM
+    Attempts to invent the words for a given acronym using an LLM.
+    (Preference towards args)
     """
     cmd.use_default_opt("prompt")
-    message = cmd.get_reply_or_arg()
+
+    arg, reply = cmd.get_arg_and_reply()
+    message = arg if arg else reply
     reply_message_id = update.message.message_id
+
+    if not message:
+        try_msg(
+            context.bot,
+            chat_id=update.message.chat_id,
+            parse_mode="Markdown",
+            text="No puedo desigliar esto! :(",
+            reply_to_message_id=reply_message_id,
+        )
+
+        return
 
     ai_model = cmd.opts.pop("m", None) or cmd.opts.pop("model", None) or DESIGLIAR_MODEL
     client = ai_client(ai_model, update)
