@@ -2,9 +2,10 @@ from telegram import Update, ParseMode, constants, InlineKeyboardButton, InlineK
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
 
-from commands.base import Command
 import data
 import re
+
+from commands.base import Command
 from commands.decorators import command
 from config.logger import log_command
 from utils import try_msg, reverse_acronym, \
@@ -18,8 +19,7 @@ def desiglar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     log_command(update)
 
-    msg, reply = cmd.get_arg_and_reply()
-    arg = msg if msg else reply
+    arg = cmd.get_arg_or_reply()
 
     message = data.Acronyms.get(arg.lower())
 
@@ -55,8 +55,7 @@ def siglar(update: Update, context: CallbackContext, cmd: Command) -> None:
     Saves a phrase as an acronym
     """
     log_command(update)
-    msg, reply = cmd.get_arg_and_reply()
-    arg = msg if msg else reply
+    arg = cmd.get_arg_or_reply()
 
     acronym = generate_acronym(arg)
     old_acronym = data.Acronyms.get(acronym)
@@ -92,8 +91,7 @@ def glosario(update: Update, context: CallbackContext, cmd: Command) -> None:
     of the user that called the command."""
 
     log_command(update)
-    msg, reply = cmd.get_arg_and_reply()
-    arg = msg if msg else reply
+    arg = cmd.get_arg_or_reply()
 
     if arg:
         if len(arg) > 1:

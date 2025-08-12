@@ -1,20 +1,21 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from commands.decorators import member_exclusive
+from commands.decorators import command
+from commands.base import Command
 from config.logger import log_command
-from utils import get_arg, try_msg, guard_editable_bot_message, try_edit
+from utils import try_msg, guard_editable_bot_message, try_edit
 
 LIST_HASHTAG = "#LISTA"
 
 
-@member_exclusive
-def lista(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def lista(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Starts an editable list
     """
     log_command(update)
-    arg = get_arg(update)
+    arg = cmd.get_arg_or_reply()
     message = f"{LIST_HASHTAG} {arg}:"
 
     try_msg(context.bot,
@@ -23,8 +24,8 @@ def lista(update: Update, context: CallbackContext) -> None:
             text=message)
 
 
-@member_exclusive
-def agregar(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def agregar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Adds an item to a list
     """
@@ -35,7 +36,7 @@ def agregar(update: Update, context: CallbackContext) -> None:
     lines = content.split("\n")
     lines_count = len(lines)
 
-    addition = get_arg(update).replace("\n", " ")
+    addition = cmd.arg.replace("\n", " ")
 
     new_message = content + f"\n{lines_count}- " + addition
 
@@ -48,8 +49,8 @@ def agregar(update: Update, context: CallbackContext) -> None:
     )
 
 
-@member_exclusive
-def quitar(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def quitar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Removes an item from a list
     """
@@ -58,7 +59,7 @@ def quitar(update: Update, context: CallbackContext) -> None:
 
     content = update.message.reply_to_message.text
 
-    number = int(get_arg(update))
+    number = int(cmd.arg)
     number_dash = str(number) + "-"
 
     lines = content.split("\n")
@@ -88,8 +89,8 @@ def quitar(update: Update, context: CallbackContext) -> None:
     )
 
 
-@member_exclusive
-def editar(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def editar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Edits an item from a list
     """
@@ -98,7 +99,7 @@ def editar(update: Update, context: CallbackContext) -> None:
         return
 
     content = update.message.reply_to_message.text
-    args = get_arg(update)
+    args = cmd.arg
 
     try:
         number = int(args[:args.find(" ")])
@@ -129,7 +130,7 @@ def editar(update: Update, context: CallbackContext) -> None:
     )
 
 
-@member_exclusive
+@command(member_exclusive=True)
 def deslistar(update: Update, context: CallbackContext) -> None:
     """
     Cierra una lista

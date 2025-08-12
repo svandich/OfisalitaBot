@@ -1,39 +1,39 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from commands.decorators import member_exclusive
+from commands.decorators import command
+from commands.base import Command
 from config.logger import log_command
-from utils import get_arg, try_msg
+from utils import try_msg
 
 
-@member_exclusive
-def slashear(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def slashear(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Converts a phrase into a slash-ized version
     """
     log_command(update)
-    if update.message.reply_to_message:
-        words = update.message.reply_to_message.text.split()
-        response = "/" + words[0].lower()
-        for word in words[1:]:
-            response += word.capitalize()
-        try_msg(
-            context.bot,
-            chat_id=update.message.chat_id,
-            parse_mode="HTML",
-            text=response,
-        )
+    arg = cmd.get_arg_or_reply()
+
+    words = arg.split()
+    response = "/" + words[0].lower()
+    for word in words[1:]:
+        response += word.capitalize()
+    try_msg(
+        context.bot,
+        chat_id=update.message.chat_id,
+        parse_mode="HTML",
+        text=response,
+    )
 
 
-@member_exclusive
-def uwuspeech(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def uwuspeech(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Converts a phrase into an uwu-ized version
     """
     log_command(update)
-    arg = get_arg(update)
-    if update.message.reply_to_message and not arg:
-        arg = update.message.reply_to_message.text
+    arg = cmd.get_arg_or_reply()
 
     message = (
         arg.replace("r", "w")
@@ -54,15 +54,13 @@ def uwuspeech(update: Update, context: CallbackContext) -> None:
     )
 
 
-@member_exclusive
-def repetir(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def repetir(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
-    Repeats a given message
+    Repeats the text of a given message
     """
     log_command(update)
-    arg = get_arg(update)
-    if update.message.reply_to_message and not arg:
-        arg = update.message.reply_to_message.text
+    arg = cmd.get_arg_or_reply()
 
     try_msg(
         context.bot,
@@ -72,7 +70,7 @@ def repetir(update: Update, context: CallbackContext) -> None:
     )
 
 
-@member_exclusive
+@command(member_exclusive=True)
 def distancia(update: Update, context: CallbackContext) -> None:
     """
     Counts the distance between the current message and the message being replied to

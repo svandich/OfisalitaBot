@@ -1,20 +1,21 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from commands.decorators import member_exclusive
+from commands.base import Command
+from commands.decorators import command
 from config.logger import log_command
 from utils import get_arg, try_msg, guard_editable_bot_message, try_edit
 
 COUNTER_HASHTAG = "#CONTADOR"
 
 
-@member_exclusive
-def contador(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def contador(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Starts an editable counter
     """
     log_command(update)
-    arg = get_arg(update).replace("\n", " ")
+    arg = cmd.get_arg_or_reply().replace("\n", " ")
     message = f"{COUNTER_HASHTAG} {arg}:\n0"
 
     try_msg(context.bot,
@@ -23,8 +24,8 @@ def contador(update: Update, context: CallbackContext) -> None:
             text=message)
 
 
-@member_exclusive
-def sumar(update: Update, context: CallbackContext, sign: int = 1) -> None:
+@command(member_exclusive=True)
+def sumar(update: Update, context: CallbackContext, cmd: Command, sign: int = 1) -> None:
     """
     Adds a number to a counter (default 1)
     """
@@ -36,11 +37,7 @@ def sumar(update: Update, context: CallbackContext, sign: int = 1) -> None:
 
     previous_number = int(lines[-1])
 
-    argument = get_arg(update)
-    if not argument:
-        addition = 1
-    else:
-        addition = int(get_arg(update))
+    addition = int(cmd.arg) if cmd.arg else 1
 
     addition *= sign
 
@@ -57,7 +54,7 @@ def sumar(update: Update, context: CallbackContext, sign: int = 1) -> None:
     )
 
 
-@member_exclusive
+@command(member_exclusive=True)
 def restar(update: Update, context: CallbackContext) -> None:
     """
     Subtracts a number to a counter (default 1)
