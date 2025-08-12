@@ -19,9 +19,9 @@ def member_exclusive(func: Callable):
     """
 
     @functools.wraps(func)
-    def member_check(update: Update, context: CallbackContext) -> None:
+    def member_check(update: Update, context: CallbackContext, *args) -> None:
         if debug:
-            func(update, context)
+            func(update, context, *args)
             return
 
         chat_member = context.bot.getChatMember(group_id, update.message.from_user.id)
@@ -41,7 +41,7 @@ def member_exclusive(func: Callable):
             )
             return
 
-        func(update, context)
+        func(update, context, *args)
         return
 
     return member_check
@@ -55,9 +55,9 @@ def group_exclusive(func: Callable):
     """
 
     @functools.wraps(func)
-    def group_check(update: Update, context: CallbackContext) -> None:
+    def group_check(update: Update, context: CallbackContext, *args) -> None:
         if debug:
-            func(update, context)
+            func(update, context, *args)
             return
 
         if update.message.chat_id != group_id:
@@ -75,7 +75,7 @@ def group_exclusive(func: Callable):
             )
             return
 
-        func(update, context)
+        func(update, context, *args)
         return
 
     return group_check
@@ -91,14 +91,16 @@ def command(member_exclusive: bool = False, group_exclusive: bool = False):
 
     def decorator(func: Callable):
         @functools.wraps(func)
-        def wrapper(update: Update, context: CallbackContext) -> None:
+        def wrapper(update: Update, context: CallbackContext, *args) -> None:
             command = Command(update.message)
             log_command(update)
             try:
-                if len(inspect.signature(func).parameters) == 3:
-                    func(update, context, command)
+                params = inspect.signature(func).parameters
+                arg_annotations = map(lambda arg : arg.annotation, params.values())
+                if Command in arg_annotations and len(params) >= 3:
+                    func(update, context, command, *args)
                 else:
-                    func(update, context)
+                    func(update, context, *args)
             except Exception as e:
                 try_msg(
                     context.bot,
