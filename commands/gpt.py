@@ -89,7 +89,7 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
         )
     else:
         system = ""
-    
+
     conversation = [GenAIMessage("user", message)]
 
     response = client.generate(conversation, system=system, **{"temperature": 0.5, **cmd.opts})
@@ -111,11 +111,11 @@ def desigliar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     cmd.use_default_opt("prompt")
 
-    arg, reply = cmd.get_arg_and_reply()
-    message = arg if arg else reply
+    msg, reply = cmd.get_arg_and_reply()
+    arg = msg if msg else reply
     reply_message_id = update.message.message_id
 
-    if not message:
+    if not arg:
         try_msg(
             context.bot,
             chat_id=update.message.chat_id,
@@ -142,7 +142,7 @@ def desigliar(update: Update, context: CallbackContext, cmd: Command) -> None:
         GenAIMessage("assistant", "quien pa su"),
         GenAIMessage("user", "ypqnm"),
         GenAIMessage("assistant", "y por que no me"),
-        GenAIMessage("user", message),
+        GenAIMessage("user", arg),
     ]
 
     response = client.generate(
