@@ -68,6 +68,16 @@ class Command:
             return get_text_or_caption(self.message_obj.reply_to_message)
         return self.arg
 
+
+    def get_arg_or_reply(self) -> str:
+        """
+        Returns the argument of the command OR the text of the message replied to.
+        (Preference towards arguments)
+        """
+        if self.arg:
+            return self.arg
+        return get_text_or_caption(self.message_obj.reply_to_message)
+
     def get_arg_and_reply(self) -> tuple[str, str]:
         """
         Returns the argument of a command AND the text of the message replied to.
