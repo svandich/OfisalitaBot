@@ -2,25 +2,27 @@ from telegram import Update, ParseMode, constants, InlineKeyboardButton, InlineK
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
 
+from commands.base import Command
 import data
 import re
-from commands.decorators import member_exclusive
+from commands.decorators import command
 from config.logger import log_command
-from utils import get_arg, try_msg, reverse_acronym, \
+from utils import try_msg, reverse_acronym, \
     generate_acronym
 
 
-@member_exclusive
-def desiglar(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def desiglar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Turns an acronym into its corresponding phrase
     """
     log_command(update)
-    arg = get_arg(update)
-    if update.message.reply_to_message and not arg:
-        arg = update.message.reply_to_message.text
+
+    msg, reply = cmd.get_arg_and_reply()
+    arg = msg if msg else reply
 
     message = data.Acronyms.get(arg.lower())
+
     if message is None:
         message = reverse_acronym(arg.lower())
         message += "\n<i>Para hacer una sigla real:</i> /siglar"
@@ -47,20 +49,19 @@ def confirm_siglar(update: Update, context: CallbackContext) -> None:
 
     query.edit_message_text(text=response, parse_mode="HTML")
 
-@member_exclusive
-def siglar(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def siglar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     Saves a phrase as an acronym
     """
     log_command(update)
-    arg = get_arg(update)
-    if update.message.reply_to_message and not arg:
-        arg = update.message.reply_to_message.text
+    msg, reply = cmd.get_arg_and_reply()
+    arg = msg if msg else reply
 
     acronym = generate_acronym(arg)
     old_acronym = data.Acronyms.get(acronym)
 
-    message = acronym 
+    message = acronym
     if old_acronym is not None and old_acronym != arg:
         keyboard = [
                         [
@@ -85,13 +86,14 @@ def siglar(update: Update, context: CallbackContext) -> None:
             text=message)
 
 
-@member_exclusive
-def glosario(update: Update, context: CallbackContext) -> None:
+@command(member_exclusive=True)
+def glosario(update: Update, context: CallbackContext, cmd: Command) -> None:
     """Sends a list of acronyms and meanings to the private chat
     of the user that called the command."""
 
     log_command(update)
-    arg = get_arg(update)
+    msg, reply = cmd.get_arg_and_reply()
+    arg = msg if msg else reply
 
     if arg:
         if len(arg) > 1:
