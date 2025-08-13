@@ -81,6 +81,10 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
     message, reply = cmd.get_arg_and_reply()
     reply_message_id = update.message.message_id
 
+    if not message and reply:
+        message = reply
+        reply = ""
+
     if reply:
         system = (
             f"Considera que el usuario está respondiendo a un mensaje. "
@@ -111,8 +115,7 @@ def desigliar(update: Update, context: CallbackContext, cmd: Command) -> None:
     """
     cmd.use_default_opt("prompt")
 
-    msg, reply = cmd.get_arg_and_reply()
-    arg = msg if msg else reply
+    arg = cmd.get_arg_or_reply()
     reply_message_id = update.message.message_id
 
     if not arg:

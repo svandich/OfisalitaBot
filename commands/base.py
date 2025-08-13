@@ -2,7 +2,7 @@ import re
 import json
 
 from telegram import Message, CallbackQuery
-from utils import strip_quotes, parse_str
+from utils import get_text_or_caption, strip_quotes, parse_str
 
 
 class Command:
@@ -26,7 +26,7 @@ class Command:
         """
         match = re.match(
             r"^(?P<command>\/\w+)(?:@(?P<target>\w*))?(?:\((?P<opts>.*?)\))?(?: (?P<arg>.*))?$",
-            self.message_obj.text,
+            get_text_or_caption(self.message_obj),
             re.DOTALL,
         )
         if match:
@@ -65,15 +65,25 @@ class Command:
         (Preference towards replies)
         """
         if self.message_obj.reply_to_message:
-            return self.message_obj.reply_to_message.text
+            return get_text_or_caption(self.message_obj.reply_to_message)
         return self.arg
+
+
+    def get_arg_or_reply(self) -> str:
+        """
+        Returns the argument of the command OR the text of the message replied to.
+        (Preference towards arguments)
+        """
+        if self.arg:
+            return self.arg
+        return get_text_or_caption(self.message_obj.reply_to_message)
 
     def get_arg_and_reply(self) -> tuple[str, str]:
         """
         Returns the argument of a command AND the text of the message replied to.
         """
         if self.message_obj.reply_to_message:
-            return self.arg, self.message_obj.reply_to_message.text
+            return self.arg, get_text_or_caption(self.message_obj.reply_to_message)
         return self.arg, ""
 
     def use_default_opt(self, default_key: str):

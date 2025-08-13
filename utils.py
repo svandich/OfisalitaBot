@@ -3,7 +3,7 @@ import re
 import tiktoken
 from string import ascii_lowercase, ascii_uppercase
 
-from telegram import Update, Bot, TelegramError, constants as tg_constants
+from telegram import Message, Update, Bot, TelegramError, constants as tg_constants
 from telegram.ext import CallbackContext
 
 import data
@@ -149,6 +149,15 @@ def get_arg_reply(update: Update) -> str:
     except AttributeError:
         arg = ""
     return arg
+
+
+def get_text_or_caption(msg: Message) -> str:
+    """
+    Returns the text of the message argument, or the caption if no text is available.
+    This handles messages that have media and captions,
+    which apparently don't have a valid text field.
+    """
+    return msg.text if msg.text else msg.caption
 
 
 def generate_acronym(string: str) -> str:
