@@ -83,6 +83,7 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
 
     if not message and reply:
         message = reply
+        reply = ""
 
     if reply:
         system = (
