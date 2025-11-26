@@ -1,5 +1,5 @@
 GPT = "gpt-4o"
-CLAUDE = "claude-3-5-sonnet"
+CLAUDE = "claude-sonnet-4-5"
 
 # Models used in AI commands
 REPLY_MODEL = CLAUDE

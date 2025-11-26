@@ -1,14 +1,15 @@
 PRICING_PER_M_TOKENS = {
+    # TODO: update this with newer OpenAI models
     # https://openai.com/api/pricing/
     "gpt-4o": {"input": 5, "output": 15},
     "gpt-4o-2024-05-13": {"input": 5, "output": 15},
     "gpt-3.5-turbo-0125": {"input": 0.5, "output": 1.5},
     "gpt-3.5-turbo-instruct": {"input": 1.5, "output": 2},
-    # https://www.anthropic.com/pricing#anthropic-api
-    "claude-3-5-sonnet": {"input": 3, "output": 15},
-    "claude-3-sonnet": {"input": 3, "output": 15},
-    "claude-3-opus": {"input": 15, "output": 75},
-    "claude-3-haiku": {"input": 0.25, "output": 1.25},
+    # https://platform.claude.com/docs/en/about-claude/models/overview
+    "claude-sonnet-4-5": {"input": 3, "output": 15},
+    "claude-haiku-4-5": {"input": 1, "output": 5},
+    "claude-opus-4-5": {"input": 5, "output": 25},
+    "claude-opus-4-1": {"input": 15, "output": 75},
 }
 
 
