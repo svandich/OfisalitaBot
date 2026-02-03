@@ -85,14 +85,18 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
         message = reply
         reply = ""
 
+    system = (
+        f"Eres un bot de Telegram dentro de un chat de un grupo de amistades. "
+        f"Las personas del chat pueden invocar una respuesta de LLM sobre cualquier cosa. "
+        f"Para responder, usa el formato de Markdown simplificado de Telegram (sin encabezados)."
+    )
+
     if reply:
-        system = (
-            f"Considera que el usuario está respondiendo a un mensaje. "
-            f"Este mensaje podría ser el sujeto del mensaje que te envía, un complemento, contexto adicional para el prompt, etc. "
+        system += (
+            f"\n\nConsidera que la persona está respondiendo a un mensaje. "
+            f"Ese mensaje podría ser el sujeto del mensaje que te envía, un complemento, contexto adicional para el prompt, etc. "
             f"El mensaje al que se está respondiendo es el siguiente:\n\n\"{reply}\""
         )
-    else:
-        system = ""
 
     conversation = [GenAIMessage("user", message)]
 
