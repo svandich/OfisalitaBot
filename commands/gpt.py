@@ -89,6 +89,7 @@ def reply_gpt(update: Update, context: CallbackContext, cmd: Command) -> None:
         f"Eres un bot de Telegram dentro de un chat de un grupo de amistades. "
         f"Las personas del chat pueden invocar una respuesta de LLM sobre cualquier cosa. "
         f"Para responder, usa el formato de Markdown simplificado de Telegram (sin encabezados)."
+    )
 
     if reply:
         system += (
