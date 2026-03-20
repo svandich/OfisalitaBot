@@ -2,6 +2,7 @@ import requests
 from telegram import Update
 from random import choice
 from datetime import time
+from time import sleep
 import pytz
 
 from telegram.ext import CallbackContext
@@ -136,7 +137,9 @@ def prec_msg(yest: int, today: int) -> str:
         "hubo un error en la predicción de lluvia :("
 
 
-def forecast() -> None:
+def forecast(
+    max_retries: int = 3, retry_sleep_s: float = 2.0
+) -> tuple[str, str, str]:
     """
     Calculates today's and yesterday's forecasts
     """
@@ -150,37 +153,56 @@ def forecast() -> None:
         forecast_days="1",
     )
 
-    response = requests.get(url=url, params=params)
+    last_err: Exception | None = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = requests.get(url=url, params=params, timeout=10)
+            data = response.json()
+            temp = data["hourly"]["temperature_2m"]
+            prec = data["hourly"]["precipitation"]
 
-    data = response.json()
-    temp = data["hourly"]["temperature_2m"]
-    prec = data["hourly"]["precipitation"]
+            i = 7  # hora de inicio ventana de interés
+            f = 22  # hora de fin ventana de interés
 
-    i = 7  # hora de inicio ventana de interés
-    f = 22  # hora de fin ventana de interés
+            mnYest = str(round(min(temp[i:f])))
+            mxYest = str(round(max(temp[i:f])))
+            precYest = sum(prec[i:f]) / (f - i)
+            emojiYest = weather_emoji(mnYest, mxYest, precYest)
+            tempYest = (
+                "Ayer: " + emojiYest + " " + mnYest + "/" + mxYest + "°C"
+            )
 
-    mnYest = str(round(min(temp[i:f])))
-    mxYest = str(round(max(temp[i:f])))
-    precYest = sum(prec[i:f]) / (f - i)
-    emojiYest = weather_emoji(mnYest, mxYest, precYest)
-    tempYest = "Ayer: " + emojiYest + " " + mnYest + "/" + mxYest + "°C"
+            mnToday = str(round(min(temp[i + 24 : f + 24])))
+            mxToday = str(round(max(temp[i + 24 : f + 24])))
+            precToday = sum(prec[i + 24 : f + 24]) / (f - i)
+            emojiToday = weather_emoji(mnToday, mxToday, precToday)
+            tempToday = (
+                "Hoy: " + emojiToday + " " + mnToday + "/" + mxToday + "°C"
+            )
 
-    mnToday = str(round(min(temp[i + 24 : f + 24])))
-    mxToday = str(round(max(temp[i + 24 : f + 24])))
-    precToday = sum(prec[i + 24 : f + 24]) / (f - i)
-    emojiToday = weather_emoji(mnToday, mxToday, precToday)
-    tempToday = "Hoy: " + emojiToday + " " + mnToday + "/" + mxToday + "°C"
+            return tempYest, tempToday, prec_msg(precYest, precToday)
+        except Exception as e:
+            last_err = e
+            if attempt < max_retries:
+                sleep(retry_sleep_s)
 
-    return tempYest, tempToday, prec_msg(precYest, precToday)
+    raise RuntimeError(
+        f"No se pudo obtener el clima (intentos={max_retries})."
+    ) from last_err
 
 
 def weather(context: CallbackContext) -> None:
     """
     Tells the weather forecast for the day
     """
-    tempYest, tempToday, prec = forecast()
-    message = intro() + tempYest + "\n" + tempToday + "\n" + prec
-
+    try:
+        tempYest, tempToday, prec = forecast()
+        message = intro() + tempYest + "\n" + tempToday + "\n" + prec
+    except Exception as e:
+        message = (
+            f"{intro()}\nIntenté consiguir los datos del clima, pero no lo logré 😭."
+            "\nIntenta con /clima más tarde..."
+        )
     try_msg(
         context.bot,
         chat_id=context.job.context,
@@ -196,16 +218,25 @@ def reply_clima(update: Update, context: CallbackContext) -> None:
     """
     log_command(update)
 
-    _, tempToday, prec = forecast()
-    message = tempToday + "\n" + prec
+    try:
+        _, tempToday, prec = forecast()
+        message = tempToday + "\n" + prec
 
-    try_msg(
-        context.bot,
-        chat_id=update.message.chat_id,
-        parse_mode="markdown",
-        text=message,
-        reply_to_message_id=update.message.message_id,
-    )
+        try_msg(
+            context.bot,
+            chat_id=update.message.chat_id,
+            parse_mode="markdown",
+            text=message,
+            reply_to_message_id=update.message.message_id,
+        )
+    except Exception:
+        try_msg(
+            context.bot,
+            chat_id=update.message.chat_id,
+            parse_mode="markdown",
+            text="Algo falló cuando intenté conseguir los datos del clima :C. Revisa los logs porfis?",
+            reply_to_message_id=update.message.message_id,
+        )
 
 
 def sync_weather_jobs(job_queue, chat_id: int) -> None:
