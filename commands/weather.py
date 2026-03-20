@@ -53,6 +53,7 @@ def intro() -> str:
         "wakey, wakey, ofisalita",
         "good morning ofisaleet-a",
         "wake up samurai",
+        "QUETEN"
     ]
     presentation = [
         "les traigo el clima",
@@ -78,63 +79,79 @@ def weather_emoji(mnTemp: str, mxTemp: str, prec: int) -> str:
     """
     avg = (int(mnTemp) + int(mxTemp)) / 2
 
-    if prec > 10:
+    if prec >= 40:
         return "🌧"
     elif avg < 12:
-        return "❄️"
+        return "🥶"
     elif avg < 15:
         return "🌤"
     elif avg < 18:
         return "😎"
-    else:
+    elif avg < 20:
         return "☀️"
+    else:
+        return "🔥"
 
 
 def prec_msg(yest: int, today: int) -> str:
     """
-    Generates a precipitation forecast string
+    Generates a precipitation forecast string based on max probability
     """
-    if yest == 0 and today == 0:
+    # 1. Dry yesterday / Dry today
+    if yest < 15 and today < 15:
         return ""
-    elif today == 0:
+
+    # 2. Wet yesterday / Dry today
+    elif today < 15:
         ayer_si = [
             "parece que ya pasó la lluvia",
             "risk of rain: none",
             "abrigate que va a hacer frío wuaja",
         ]
         return choice(ayer_si)
-    elif yest - 20 > today:
+
+    # 3. Dry yesterday / Wet today
+    elif yest < 15:
+        hoy_si = [
+            "saquen los paraguas que hoy llueve",
+            "se viene lluvia, cuidadito",
+            "WARNING: RISK OF RAIN",
+        ]
+        return choice(hoy_si)
+
+    # 4. Wet yesterday / Wet today
+    precipitation_difference = today - yest
+
+    if precipitation_difference <= -40:
         mucho_menos = [
             "no va a llover tanto como ayer",
             "ayer llovió harto, no será tanto hoy",
         ]
         return choice(mucho_menos)
-    elif yest - 10 > today:
+    elif precipitation_difference <= -20:
         menos = [
-            "hoy va a llover menos que ayer, pero no sé si me confiaría",
+            "hoy hay menos prob de lluvia que ayer, pero no sé si me confiaría",
             "al ojo llueve menos",
         ]
         return choice(menos)
-    elif yest > today or yest < today - 10:
+    elif -20 < precipitation_difference < 20:
         igual = [
             "debería llover lo mismo hoy que ayer",
             "la lluvia se mantendrá como ayer",
         ]
         return choice(igual)
-    elif yest < today - 20:
-        mas = [
-            "mañana llueve más, prepararse",
-            "se viene lluvia, cuidadito",
-        ]
-        return choice(mas)
-    elif yest < today:
+    elif precipitation_difference >= 40:
         harto = [
-            "si este bot está bien programado, mañana llueve harto",
-            "WARNING: RISK OF RAIN",
+            "hoy llueve mucho más que ayer, prepararse",
+            "se viene harto mas fuerte la lluvia",
         ]
         return choice(harto)
-    else:
-        "hubo un error en la predicción de lluvia :("
+    else:  # >= 20 but < 40
+        mas = [
+            "hoy llueve más que ayer",
+            "empeora la lluvia hoy",
+        ]
+        return choice(mas)
 
 
 def forecast(
@@ -147,7 +164,7 @@ def forecast(
     params = dict(
         latitude="-33.4569",
         longitude="-70.6483",
-        hourly="temperature_2m,precipitation",
+        hourly="temperature_2m,precipitation_probability",
         timezone="auto",
         past_days="1",
         forecast_days="1",
@@ -159,14 +176,14 @@ def forecast(
             response = requests.get(url=url, params=params, timeout=10)
             data = response.json()
             temp = data["hourly"]["temperature_2m"]
-            prec = data["hourly"]["precipitation"]
+            prec = data["hourly"]["precipitation_probability"]
 
             i = 7  # hora de inicio ventana de interés
             f = 22  # hora de fin ventana de interés
 
             mnYest = str(round(min(temp[i:f])))
             mxYest = str(round(max(temp[i:f])))
-            precYest = sum(prec[i:f]) / (f - i)
+            precYest = max(prec[i:f])
             emojiYest = weather_emoji(mnYest, mxYest, precYest)
             tempYest = (
                 "Ayer: " + emojiYest + " " + mnYest + "/" + mxYest + "°C"
@@ -174,7 +191,7 @@ def forecast(
 
             mnToday = str(round(min(temp[i + 24 : f + 24])))
             mxToday = str(round(max(temp[i + 24 : f + 24])))
-            precToday = sum(prec[i + 24 : f + 24]) / (f - i)
+            precToday = max(prec[i + 24 : f + 24])
             emojiToday = weather_emoji(mnToday, mxToday, precToday)
             tempToday = (
                 "Hoy: " + emojiToday + " " + mnToday + "/" + mxToday + "°C"
