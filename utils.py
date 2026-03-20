@@ -1,5 +1,6 @@
 import random
 import re
+from datetime import datetime, time as time_type
 import tiktoken
 from string import ascii_lowercase, ascii_uppercase
 
@@ -383,3 +384,29 @@ def parse_str(string: str) -> bool | int | float | str:
     except ValueError:
         pass
     return string
+
+def parse_bool(raw: str) -> bool | None:
+    """
+    Parses a string into a boolean if possible (considering intent)
+    """
+    normalized = str(raw).strip().lower()
+    if normalized in ("true", "t", "yes", "y", "on", "1"):
+        return True
+    if normalized in ("false", "f", "no", "n", "off", "0"):
+        return False
+    return None
+
+def parse_time(raw: str) -> time_type | None:
+    """
+    Parses a string into a time of the day if possible (considering intent)
+    Supports:
+      - "H" -> H:00
+      - "HH:MM" -> HH:MM
+      - "HH:MM:SS" -> HH:MM:SS
+    """
+    for fmt in ("%H:%M:%S", "%H:%M", "%H"):
+        try:
+            return datetime.strptime(raw, fmt).time()
+        except ValueError:
+            continue
+    return None
