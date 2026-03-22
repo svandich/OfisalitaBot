@@ -14,7 +14,8 @@ from commands.summary import resumir, noticia, confirm_resumir
 from commands.text import slashear, uwuspeech, repetir, distancia
 from commands.gpt import reply_gpt, reply_fill, desigliar
 from commands.stats import stats, stats_detail
-from commands.weather import weather, enable_weather
+from commands.config_flags import set_config, init_configs
+from commands.weather import reply_clima
 
 
 def add_command(command: str | list[str], callback: callable, **kwargs):
@@ -58,6 +59,7 @@ def receive_message(update, context):
 
 def main():
     data.init()
+    init_configs(job_queue=updater.job_queue)
 
     # Acronym
     add_command("desiglar", desiglar)
@@ -103,8 +105,9 @@ def main():
     add_command("resumir", resumir)
     add_command(["noticia", "noticias", "quepaso"], noticia)
 
-    # Weather
-    add_command("habilitar_clima", enable_weather)
+    # Config
+    add_command(["set", "config"], set_config)
+    add_command("clima", reply_clima)
 
     # Stats
     add_command("stats", stats)
