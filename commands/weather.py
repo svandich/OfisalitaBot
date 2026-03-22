@@ -75,22 +75,41 @@ def intro() -> str:
 
 def weather_emoji(mnTemp: str, mxTemp: str, prec: int) -> str:
     """
-    Calculates an apropiate emoji for the given weather
+    Calculates an appropriate emoji for the given weather conditions
     """
-    avg = (int(mnTemp) + int(mxTemp)) / 2
+    mn = int(mnTemp)
+    mx = int(mxTemp)
+    avg = (mn + mx) / 2
 
-    if prec >= 40:
-        return "🌧"
-    elif avg < 12:
-        return "🥶"
-    elif avg < 15:
-        return "🌤"
+    # 1. Precipitation takes priority (Scale: 0 - 100)
+    if prec >= 80:
+        return "⛈️"  # High probability of heavy rain / storm
+    elif prec >= 40:
+        return "🌧️"  # Solid chance of rain
+    elif prec >= 20:
+        return "🌦️"  # Mixed / Drizzle / Low chance
+
+    # 2. Extreme Heat (Looking at the peak of the day)
+    if mx >= 32:
+        return "🔥"  # Scorching hot
+    elif mx >= 28:
+        return "🥵"  # Very hot
+
+    # 3. Extreme Cold (Looking at freezing mornings or very cold peaks)
+    if mx <= 12:
+        return "🥶"  # Freezing all day
+    elif mn <= 3 and mx <= 18:
+        return "🧊"  # Frosty morning, but warms up a bit
+
+    # 4. Standard / Mild Weather (Using average as a fallback)
+    if avg < 14:
+        return "🧣"  # Chilly, need a scarf/jacket
     elif avg < 18:
-        return "😎"
-    elif avg < 20:
-        return "☀️"
+        return "🌤️"  # Cool and crisp
+    elif avg < 24:
+        return "😎"  # Perfect pleasant weather
     else:
-        return "🔥"
+        return "☀️"  # Warm and sunny (24 to 27 max)
 
 
 def prec_msg(yest: int, today: int) -> str:
