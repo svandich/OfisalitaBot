@@ -1,22 +1,9 @@
-import random
-import re
 from datetime import datetime, time as time_type
-import tiktoken
-from string import ascii_lowercase, ascii_uppercase
 
 from telegram import Message, Update, Bot, TelegramError, constants as tg_constants
 from telegram.ext import CallbackContext
 
-import data
 from config.logger import logger
-
-word_file = "static/words.txt"
-WORDS = open(word_file).read().splitlines()
-LETTER_DICTIONARY = {}
-for character in ascii_lowercase:
-    LETTER_DICTIONARY[character] = [
-        word for word in WORDS if word.lower().startswith(character)
-    ]
 
 
 def _try_send(
@@ -57,16 +44,7 @@ def try_msg(bot: Bot, attempts: int = 2, **params) -> None:
     Make multiple attempts to send a text message.
     """
     error_message = "Messaging chat"
-    message = _try_send(bot, attempts, bot.send_message, error_message, **params)
-    if message:
-        data.Messages.add(
-            message.message_id,
-            message.date,
-            message.from_user.id,
-            message.from_user.username,
-            message.text,
-            message.reply_to_message.message_id if message.reply_to_message else None,
-        )
+    _try_send(bot, attempts, bot.send_message, error_message, **params)
 
 
 def try_edit(bot: Bot, attempts: int = 2, **params) -> None:
@@ -83,14 +61,6 @@ def try_sticker(bot: Bot, attempts: int = 2, **params) -> None:
     """
     error_message = "Stickering chat"
     _try_send(bot, attempts, bot.send_sticker, error_message, **params)
-
-
-def try_poll(bot: Bot, attempts: int = 2, **params) -> None:
-    """
-    Make multiple attempts to send a poll.
-    """
-    error_message = "Sending poll to chat"
-    _try_send(bot, attempts, bot.send_poll, error_message, **params)
 
 
 def try_delete(bot: Bot, attempts: int = 2, **params) -> None:
@@ -161,59 +131,6 @@ def get_text_or_caption(msg: Message) -> str:
     return msg.text if msg.text else msg.caption
 
 
-def generate_acronym(string: str) -> str:
-    """
-    Generates a lowercase acronym of the input string.
-
-    Examples:
-        >>>generate_acronym("qué querís que te diga")
-        qqqtd
-        >>>generate_acronym("*se resbala y se cambia a movistar*")
-        *sryscam*
-        >>>generate_acronym(":j_____:")
-        :j:
-        >>>generate_acronym("(broma pero si quieres no es broma)")
-        (bpsqneb)
-    """
-
-    parentheses = (["(", "[", "{"], [")", "]", "}"])
-    bra, ket = "", ""
-
-    if string[0] in parentheses[0]:
-        bra = string[0]
-        bra_index = parentheses[0].index(bra)
-        ket = parentheses[1][bra_index]
-
-    delimiters = list(filter(None, ["*", ":", bra, ket]))
-    regex_pattern = rf"\s+|({'|'.join(map(re.escape, delimiters))})"
-
-    string_list = list(filter(None, re.split(regex_pattern, string)))
-
-    out = ""
-
-    for word in string_list:
-        out += word[0]
-        if word.find("?") > 0:
-            out += "?"
-
-    return out.lower()
-
-
-def reverse_acronym(string: str) -> str:
-    """
-    Makes a random phrase from an acronym
-    """
-    string_list = list(string)
-    out = ""
-    for initial in string_list:
-        if initial in LETTER_DICTIONARY:
-            out += random.choice(LETTER_DICTIONARY[initial])
-        else:
-            out += initial
-        out += " "
-    return out.lower().title()
-
-
 def guard_reply_to_message(update: Update) -> bool:
     """
     Guard statement:
@@ -268,81 +185,6 @@ def guard_editable_bot_message(
         return True
 
     return False
-
-
-def num_tokens_from_string(string: str, model: str) -> int:
-    """Returns the number of tokens in a text string."""
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
-        encoding = tiktoken.encoding_for_model("gpt-4o")
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
-
-
-def get_names_in_message(message: str) -> list[str]:
-    """
-    Returns a list of usernames in a message.
-    """
-    return re.findall(r"(?:\B|\/\w+)@(\w{5,32}\b)", message)
-
-
-def generate_aliases(names: list[str]) -> dict[str, str]:
-    """
-    Generates a dictionary associating usernames with aliases.
-    """
-    alias_dict = {}
-    for name in names:
-        if name not in alias_dict:
-            alias_type = "Persona" if not name.lower().endswith("bot") else "Bot"
-            alias = None
-            while alias is None or alias in alias_dict.values():
-                alias = f"{alias_type}{''.join([random.choice(ascii_uppercase) for _ in range(5)])}"
-            alias_dict[name] = alias
-    return alias_dict
-
-
-def get_alias_dict_from_string(text: str) -> dict[str, str]:
-    """
-    Returns a dictionary associating usernames mentioned in a string with aliases.
-    """
-    return generate_aliases(get_names_in_message(text))
-
-
-def get_alias_dict_from_messages_list(messages):
-    """
-    Returns a dictionary associating usernames from a list of messages with aliases.
-    Considers message authors and mentions.
-    """
-    names = []
-    for message in messages:
-        names.append(message["username"])
-        names += get_names_in_message(message["message"])
-    return generate_aliases(names)
-
-
-def anonymize(messages, alias_dict):
-    """
-    Anonymizes the usernames in a list of messages.
-    """
-    for message in messages:
-        if isinstance(message, str):
-            for username, alias in alias_dict.items():
-                message = message.replace(username, alias)
-        else:
-            for username, alias in alias_dict.items():
-                message["message"] = message["message"].replace(username, alias)
-            message["username"] = alias_dict[message["username"]]
-    return messages
-
-
-def deanonymize(generated_message, alias_dict):
-    """
-    Deanonymizes the usernames in a generated message
-    """
-    for username, alias in alias_dict.items():
-        generated_message = generated_message.replace(alias, username)
-    return generated_message
 
 
 def strip_quotes(string: str) -> str:
