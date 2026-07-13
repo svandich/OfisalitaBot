@@ -25,7 +25,7 @@ def intro() -> str:
     Generates a random "good morning" message
     """
     gm = [
-        "BUENOS DÍAS OFIPAPITAS!!!",
+        "BUENOS DÍAS!!!",
         "Buenos días 🌞",
         "CÓMO ESTÁ EL GRUPO MÁS BUENO PAL web-EO?!",
         "HOLA",
@@ -38,28 +38,25 @@ def intro() -> str:
         "cómo está el grupo más bueno pal lunes",
         "buenos dias amiguites",
         "ola buenos dias",
-        "/buenosDiasOfipapitas",
         "buenos dias c:",
         "Buenos dias mi gente",
         "Buenos dias bbs",
         "/buenosDiasAmoTuSonrisa",
-        "/buenosdias@ofipapinhos",
         "yoyoyo what's up GAMERS?👾?🎮?",
         "Bom dia",
         "La vida es más dulce si le sonries... Buenos días",
         "Comienza tu día declarando DIOS TIENE COSAS BUENAS PARA MI!!!",
         "bdoct",
         "saludos a todxs los valientes que ya se levantaron",
-        "wakey, wakey, ofisalita",
-        "good morning ofisaleet-a",
-        "wake up samurai",
-        "QUETEN"
+        "wakey, wakey",
+        "good morning",
+        "wake up samurai"
     ]
     presentation = [
         "les traigo el clima",
         "acá tengo el clima del día",
         "veamos como estará el climilla hoy",
-        "le tenimos el clima pa la uach",
+        "le tenimos el clima pa valdivia",
         "y ahora... _el clima_:",
         "lo vi en un sueño, el clima de hoy",
         "el clima según yo:",

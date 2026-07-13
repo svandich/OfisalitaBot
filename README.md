@@ -39,6 +39,36 @@ Los comandos ya establecidos tienen el decorador `@member_exclusive` que se enca
 
 ## Uso
 
+### Comandos (BotFather)
+
+Descripciones listas para pegar en BotFather (`/setcommands`). Como BotFather no soporta alias, cada uno de los comandos alternativos (`sumar`/`incrementar`, `lista`/`listar`, `deslistar`/`cerrar`, `gracias`/`garcias`, `set`/`config`) está listado por separado.
+
+```
+get_log - Envía el log del bot (solo admins)
+prohibir - Borra el mensaje del bot al que respondes
+contador - Crea un contador editable con el título dado
+sumar - Suma al contador al que respondes (responder)
+incrementar - Suma al contador al que respondes (responder)
+restar - Resta del contador al que respondes (responder)
+decrementar - Resta del contador al que respondes (responder)
+lista - Crea una lista editable con el título dado
+listar - Crea una lista editable con el título dado
+agregar - Agrega un ítem a la lista a la que respondes
+quitar - Quita un ítem de la lista a la que respondes por índice
+editar - Edita un ítem de la lista a la que respondes por índice
+deslistar - Cierra la lista a la que respondes (deja de ser editable)
+cerrar - Cierra la lista a la que respondes (deja de ser editable)
+slashear - Convierte el texto o mensaje citado en /comandoCamelCase
+repetir - Repite el texto dado o el mensaje al que respondes
+start - Saluda al bot
+gracias - Responde con un sticker de nada
+garcias - Responde con un sticker de nada
+hello - Responde "hello there" al mensaje citado
+set - Muestra o cambia la configuración del chat (ej. clima)
+config - Muestra o cambia la configuración del chat (ej. clima)
+clima - Muestra el pronóstico del clima de hoy
+```
+
 ### Contadores
 
 Se pueden crear mensajes que son contadores numéricos. A estos contadores se les puede sumar o restar un valor.
