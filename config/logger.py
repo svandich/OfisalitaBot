@@ -22,7 +22,7 @@ logging.basicConfig(format=(
                                                   encoding=None,
                                                   delay=False)])
 
-logger = logging.getLogger('pasoapasobot')
+logger = logging.getLogger('ofibot')
 
 
 def log_command(update):

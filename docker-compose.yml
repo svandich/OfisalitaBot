@@ -1,9 +1,0 @@
-
-services:
-  bot:
-    container_name: bot
-    build: .
-    restart: always
-    volumes:
-      - ./data/:/usr/src/app/data/
-

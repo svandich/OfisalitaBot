@@ -20,7 +20,7 @@ def get_log(update: Update, context: CallbackContext) -> None:
                               document=open(os.path.relpath(
                                   'log/bot.log'), 'rb'),
                               filename=(
-                                  "pasoapasobot_log_"
+                                  "ofibot_log_"
                                   f"{datetime.now().strftime('%d%b%Y-%H%M%S')}"
                                   ".txt"
                               ))

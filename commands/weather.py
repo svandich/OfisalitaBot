@@ -59,7 +59,7 @@ def intro() -> str:
         "les traigo el clima",
         "acá tengo el clima del día",
         "veamos como estará el climilla hoy",
-        "le tenimos el clima pa stgo",
+        "le tenimos el clima pa la uach",
         "y ahora... _el clima_:",
         "lo vi en un sueño, el clima de hoy",
         "el clima según yo:",
@@ -181,8 +181,8 @@ def forecast(
     """
     url = "https://api.open-meteo.com/v1/forecast"
     params = dict(
-        latitude="-33.4569",
-        longitude="-70.6483",
+        latitude="-39.7947",
+        longitude="-73.2459",
         hourly="temperature_2m,precipitation_probability",
         timezone="auto",
         past_days="1",

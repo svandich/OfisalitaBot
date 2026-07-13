@@ -1,0 +1,9 @@
+services:
+  ofibot:
+    container_name: ofibot
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./data/:/usr/src/app/data/
+    network_mode: "host"
+
